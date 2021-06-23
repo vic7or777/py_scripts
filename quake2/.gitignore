@@ -1,0 +1,14 @@
+*.pak
+
+#*.wal
+#*.pcx
+#*.md2
+
+#*.tga
+#*.png
+#*.jpg
+
+#*.txt
+
+!.gitignore
+!colormap.pcx
