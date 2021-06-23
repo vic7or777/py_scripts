@@ -201,7 +201,7 @@ script_path = os.path.abspath(os.path.dirname(sys.argv[0]))
 os.chdir(script_path)
 os.system('cls')
 
-colormap = Image.open(f'{script_path}\in\\pics\\colormap.pcx', formats = ('PCX',))
+colormap = Image.open(f'{script_path}\\in\\pics\\colormap.pcx', formats = ('PCX',))
 colormap.format == 'PCX'
 
 if os.path.exists(pak_name):

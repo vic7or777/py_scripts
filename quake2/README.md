@@ -1,2 +1,10 @@
-# Quake II texture program modification
+# Quake II textures program modification
  Makes textures more contrasting for a better competition experience.
+
+## RU description
+Скрипты для автоматизированной модификации текстур и скинов.
+Позволяет сделать более контрастное изображение, путем наложения цвета на оригинальные текстуры.
+Цвет определяется автоматически из самой текстуры.
+Для моделей игроков и предметов цвет скина задается в тексте скрипта.
+В отличии от picmip не приводит к замыливанию.
+На выходе генерируется пак файлы.
