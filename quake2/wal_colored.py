@@ -179,7 +179,7 @@ for tex in glob.iglob(f'{script_path}\\in\\textures\\**\\*.*', recursive=True):
         col = get_dominant_color(im)
         images_list.append((im, path, 'JPEG', col))
 
-# Apply function "mono_color_blend" to all textures in "images_list"
+# Apply function "mono_color_blend" to all textures in "images_list" and save to PAK file
 
 for i in Blends:
     pak_images(images_list, f'pak9_monocolor_blend_{i}.pak', mono_color_blend, float(i))

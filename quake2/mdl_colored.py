@@ -187,28 +187,6 @@ class Pak_Make:
         self.pak_file.write(struct.Struct('<4s2l').pack(b'PACK', self.pointer, self.table_size))
         self.pak_file.close()
 
-# https://stackoverflow.com/a/61730849
-def get_dominant_color(src_img, palette_size=16):
-    img = src_img.copy()
-    # img.convert("RGBA")
-    # img.thumbnail((100, 100))
-    paletted = img.convert('P', palette=Image.ADAPTIVE, colors=palette_size)
-    palette = paletted.getpalette()
-    color_counts = sorted(paletted.getcolors(), reverse=True)
-    palette_index = color_counts[0][1]
-    dominant_color = palette[palette_index*3:palette_index*3+3]
-    return tuple(dominant_color)
-
-def mono_domcolor_blend(im, val):
-    if val == '1.00':
-        return Image.new(im.mode, (im.width, im.height), get_dominant_color(im))
-    if im.format in ('PCX', 'WAL'):
-        mono = Image.new('RGBA', (im.width, im.height), get_dominant_color(im))
-        return Image.blend(im.convert('RGBA'), mono, val)
-    else:
-        mono = Image.new(im.mode, (im.width, im.height), get_dominant_color(im))
-        return Image.blend(im, mono, val)
-
 def mono_color_blend(im, color, val):
     if val == '1.00':
         return Image.new(im.mode, (im.width, im.height), color)
@@ -218,16 +196,6 @@ def mono_color_blend(im, color, val):
     else:
         mono = Image.new(im.mode, (im.width, im.height), color)
         return Image.blend(im, mono, val)
-
-def change_intens(im, val):
-    if val == '1.00':
-        return im
-    else:
-        if im.format == 'WAL':
-            br = ImageEnhance.Brightness(im.convert('RGBA') )
-        else:
-            br = ImageEnhance.Brightness(im)
-        return br.enhance(float(val))
 
 script_path = os.path.abspath(os.path.dirname(sys.argv[0]))
 os.chdir(script_path)
