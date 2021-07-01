@@ -1,0 +1,8 @@
+#*.tga
+#*.png
+#*.jpg
+
+#*.txt
+
+!.gitignore
+!/pic/*
