@@ -24,48 +24,48 @@ os.chdir(script_path)
 os.system('cls')
 
 
-pak_name = script_name.replace('.py', '.pak')
-# pak_name = fr'c:\quake2\baseq2\{pak_name}'
+pak_name = os.path.basename(script_name).replace('.py', '.pak')
+# pak_name = fr'c:\quake2\baseq2\z_{pak_name}'
 
 model_t = namedtuple('model_t', 'dir, model, skins, masks')
 mask_t = namedtuple('mask_t', 'file, color, blend')
 
 models = (
     model_t( r'models\weapons\g_shotg' , 'tris.md2' , ('skin.pcx', ) , (
-        mask_t('mask_barrel.png'    , '#ff6600', 1.00),
+        mask_t('mask_barrel.png'    , '#9b1f00', 1.00),
         mask_t('mask_butt.png'      , '#000000', 1.00),
         mask_t('mask_handle.png'    , '#000000', 1.00),
         mask_t('mask_mag.png'       , '#000000', 1.00),
         mask_t('mask_pivot.png'     , '#000000', 1.00),
     )),
     model_t( r'models\weapons\g_shotg2' , 'tris.md2' , ('skin.pcx', ) , (
-        mask_t('mask_bandage.png'   , '#ff6600', 1.00),
+        mask_t('mask_bandage.png'   , '#9b1f00', 1.00),
         mask_t('mask_barrel.png'    , '#000000', 1.00),
-        mask_t('mask_butt1.png'     , '#ff6600', 1.00),
+        mask_t('mask_butt1.png'     , '#9b1f00', 1.00),
         mask_t('mask_butt2.png'     , '#000000', 1.00),
-        mask_t('mask_handle1.png'   , '#ff6600', 1.00),
-        mask_t('mask_handle2.png'   , '#ff6600', 1.00),
-        mask_t('mask_pivot.png'     , '#ff6600', 1.00),
+        mask_t('mask_handle1.png'   , '#9b1f00', 1.00),
+        mask_t('mask_handle2.png'   , '#9b1f00', 1.00),
+        mask_t('mask_pivot.png'     , '#9b1f00', 1.00),
     )),
     model_t( r'models\items\ammo\shells\medium' , 'tris.md2' , ('skin.pcx', ) , (
-        mask_t( None                , '#883300', 1.00),
+        mask_t( None                , '#4d0f00', 1.00),
     )),
     model_t( r'models\weapons\g_machn' , 'tris.md2' , ('skin.pcx', ) , (
-        mask_t('mask_body.png'      , '#ffdd00', 1.00),
+        mask_t('mask_body.png'      , '#ffab07', 1.00),
         mask_t('mask_butt.png'      , '#000000', 1.00),
         mask_t('mask_handle.png'    , '#000000', 1.00),
         mask_t('mask_pivot.png'     , '#000000', 1.00),
         mask_t('mask_sight.png'     , '#000000', 1.00),
     )),
     model_t( r'models\weapons\g_chain' , 'tris.md2' , ('skin.pcx', ) , (
-        mask_t('mask_bandage.png'   , '#ffdd00', 1.00),
+        mask_t('mask_bandage.png'   , '#ffab07', 1.00),
         mask_t('mask_barrel.png'    , '#000000', 1.00),
-        mask_t('mask_body.png'      , '#ffdd00', 1.00),
-        mask_t('mask_handle.png'    , '#ffdd00', 1.00),
-        mask_t('mask_pivot.png'     , '#ffdd00', 1.00),
+        mask_t('mask_body.png'      , '#ffab07', 1.00),
+        mask_t('mask_handle.png'    , '#ffab07', 1.00),
+        mask_t('mask_pivot.png'     , '#ffab07', 1.00),
     )),
     model_t( r'models\items\ammo\bullets\medium' , 'tris.md2' , ('skin.pcx', ) , (
-        mask_t( None                , '#886600', 1.00),
+        mask_t( None                , '#885503', 1.00),
     )),
     model_t( r'models\weapons\g_launch' , 'tris.md2' , ('skin.pcx', ) , (
         mask_t('mask_barrel.png'    , '#880011', 1.00),
@@ -145,26 +145,26 @@ models = (
     )),
 
     model_t( r'models\items\mega_h' , 'tris.md2' , ('skin.pcx', ) , (
-        mask_t('mask_body.png'      , '#dddddd', 1.00),
-        mask_t('mask_cr.png'        , '#880000', 1.00),
+        mask_t('mask_body.png'      , '#aaaaaa', 1.00),
+        mask_t('mask_cr.png'        , '#ff0000', 1.00),
         mask_t('mask_num.png'       , '#444444', 1.00),
 
     )),
     model_t( r'models\items\adrenal' , 'tris.md2' , ('skin.pcx', ) , (
-        mask_t('mask_body.png'      , '#444444', 1.00),
+        mask_t('mask_body.png'      , '#aaaaaa', 1.00),
         mask_t('mask_num.png'       , '#ffffff', 1.00),
         mask_t('mask_print.png'     , '#0000ff', 1.00),
 
     )),
     model_t( r'models\items\healing\large' , 'tris.md2' , ('skin.pcx', ) , (
-        mask_t('mask_body.png'      , '#444444', 1.00),
-        mask_t('mask_num.png'       , '#660000', 1.00),
+        mask_t('mask_body.png'      , '#6b6b6b', 1.00),
+        mask_t('mask_num.png'       , '#ef0000', 1.00),
         mask_t('mask_num_sh.png'    , '#000000', 1.00),
 
     )),
     model_t( r'models\items\healing\medium' , 'tris.md2' , ('skin.pcx', ) , (
-        mask_t('mask_body.png'      , '#444444', 1.00),
-        mask_t('mask_num.png'       , '#660000', 1.00),
+        mask_t('mask_body.png'      , '#5b5b5b', 1.00),
+        mask_t('mask_num.png'       , '#992200', 1.00),
         mask_t('mask_num_sh.png'    , '#000000', 1.00),
 
     )),
@@ -189,13 +189,13 @@ models = (
         mask_t('mask_num.png'       , '#888888', 1.00),
     )),
     model_t( r'models\items\armor\jacket' , 'tris.md2' , ('skin.pcx', ) , (
-        mask_t('mask_body.png'      , '#666633', 1.00),
+        mask_t('mask_body.png'      , '#4b5b27', 1.00),
         mask_t('mask_num.png'       , '#888888', 1.00),
 
     )),
     model_t( r'models\items\armor\shard' , 'tris.md2' , ('skin.pcx', ) , (
         mask_t('mask_back.png'      , '#444444', 1.00),
-        mask_t('mask_front.png'     , '#882020', 1.00),
+        mask_t('mask_front.png'     , '#661707', 1.00),
         mask_t('mask_num.png'       , '#888888', 1.00),
 
     )),
@@ -213,8 +213,8 @@ models = (
     )),
     model_t( r'models\items\quaddama' , 'tris.md2' , ('skin.pcx', ) , (
         mask_t('mask_body.png'      , '#0088ff', 1.00),
-        mask_t('mask_nail1.png'     , '#0000ff', 1.00),
-        mask_t('mask_nail2.png'     , '#0000ff', 1.00),
+        mask_t('mask_nail1.png'     , '#0066cc', 1.00),
+        mask_t('mask_nail2.png'     , '#0066cc', 1.00),
     )),
     model_t( r'models\items\invulner' , 'tris.md2' , ('skin.pcx', ) , (
         mask_t('mask_skul.png'      , '#000000', 1.00),
@@ -222,13 +222,13 @@ models = (
 
     )),
     model_t( r'models\items\pack' , 'tris.md2' , ('skin.pcx', ) , (
-        mask_t('mask_front.png'     , '#666633', 1.00),
+        mask_t('mask_front.png'     , '#4b5b27', 1.00),
         mask_t('mask_bak.png'       , '#000000', 1.00),
         mask_t('mask_chassis.png'   , '#000000', 1.00),
-        mask_t('mask_sling.png'     , '#666633', 1.00),
+        mask_t('mask_sling.png'     , '#4b5b27', 1.00),
     )),
     model_t( r'models\items\band' , 'tris.md2' , ('skin.pcx', ) , (
-        mask_t('mask_body.png'      , '#666633', 1.00),
+        mask_t('mask_body.png'      , '#4b5b27', 1.00),
         mask_t('mask_l1.png'        , '#880000', 1.00),
         mask_t('mask_l2.png'        , '#000088', 1.00),
 
@@ -281,6 +281,43 @@ models = (
         mask_t('mask_leg2.png'      , '#ff0022', 1.00),
         mask_t('mask_leg3.png'      , '#88ff00', 1.00),
     )),
+    model_t( r'players\cyborg' , 'tris.md2' , (
+                                            'oni911.pcx'  ,
+                                            'ps9000.pcx'  ,
+                                            'tyr574.pcx'  ,
+        ) , (
+        mask_t('mask_head.png' , '#aaaaaa', 1.00),
+        mask_t('mask_pipe.png' , '#ffab07', 1.00),
+        mask_t('mask_shlder.png' , '#ff0000', 1.00),
+        mask_t('mask_hand.png' , '#aaaaaa', 1.00),
+        mask_t('mask_body.png' , '#ffab07', 1.00),
+        mask_t('mask_leg1.png' , '#ff0000', 1.00),
+        mask_t('mask_leg2.png' , '#ff4400', 1.00),
+    )),
+
+    model_t( r'models\objects\smoke'        , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#aa0000', 1.00),)),
+    model_t( r'models\objects\flash'        , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#000000', 1.00),)),
+
+    model_t( r'models\objects\laser'        , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#0088ff', 1.00),)),
+    model_t( r'models\objects\explode'      , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#000000', 1.00),)),
+
+    model_t( r'models\objects\dmspot'       , 'tris.md2' , ('skin.pcx', 'skin2.pcx' ) , (mask_t( None , '#00aa00', 0.33),)),
+
+    model_t( r'models\objects\debris1'      , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
+    model_t( r'models\objects\debris2'      , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
+    model_t( r'models\objects\debris3'      , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
+    model_t( r'models\objects\gibs\arm'     , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
+    model_t( r'models\objects\gibs\bone2'   , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
+    model_t( r'models\objects\gibs\bone'    , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
+    model_t( r'models\objects\gibs\chest'   , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
+    model_t( r'models\objects\gibs\gear'    , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
+    model_t( r'models\objects\gibs\head2'   , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
+    model_t( r'models\objects\gibs\head2'   , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
+    model_t( r'models\objects\gibs\head'    , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
+    model_t( r'models\objects\gibs\leg'     , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
+    model_t( r'models\objects\gibs\skull'   , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
+    model_t( r'models\objects\gibs\sm_meat' , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
+    model_t( r'models\objects\gibs\sm_metal', 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
 )
 
 class File_Entry:
@@ -309,6 +346,9 @@ class Pak_Make:
     def finalize(self):
         for e in self.fileentries:
             fn = e.filename.encode('ascii')
+            if len(fn) > 56:
+                print(f'file name is too long: {fn}')
+                continue
             self.pak_file.write(struct.Struct('<56s').pack(fn))
             self.pak_file.write(struct.Struct('<l'  ).pack(e.offset))
             self.pak_file.write(struct.Struct('<l'  ).pack(e.length))
@@ -349,9 +389,11 @@ for i in models:
         for m in i.masks:
             color = ImageColor.getcolor(m.color, "RGB")
             mono = Image.new(im1.mode, (im1.width, im1.height), color)
+            mono.putpixel((0, 0), (159,91,83))
             im2 = Image.blend(im1, mono, m.blend)
             if m.file:
                 im_mask = Image.open(f'in\\mask\\{i.dir}\\{m.file}').convert('L')
+                im_mask.putpixel((0, 0), 0)
                 im1 = Image.composite(im2, im1, im_mask)
             else:
                 im1 = im2
