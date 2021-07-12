@@ -31,6 +31,23 @@ model_t = namedtuple('model_t', 'dir, model, skins, masks')
 mask_t = namedtuple('mask_t', 'file, color, blend')
 
 models = (
+    model_t( r'models\weapons\g_flareg' , 'tris.md2' , ('base.pcx', ) , (
+        mask_t('mask_barrel.png'    , '#34ebae', 1.00),
+        mask_t('mask_body.png'      , '#000000', 1.00),
+        mask_t('mask_hand1.png'     , '#000000', 1.00),
+        mask_t('mask_hand2.png'     , '#34ebae', 1.00),
+    )),
+    model_t( r'models\weapons\g_blast' , 'tris.md2' , ('base.pcx', ) , (
+        mask_t('mask_barrel.png'    , '#34ebae', 1.00),
+        mask_t('mask_body_hi3.png'  , '#000000', 1.00),
+        mask_t('mask_body_hi2.png'  , '#34ebae', 1.00),
+        mask_t('mask_body_hi1.png'  , '#34ebae', 1.00),
+        mask_t('mask_body.png'      , '#000000', 1.00),
+        mask_t('mask_hand.png'      , '#000000', 1.00),
+        mask_t('mask_mag.png'       , '#000000', 1.00),
+        mask_t('mask_revolver.png'  , '#34ebae', 1.00),
+        mask_t('mask_trigger.png'   , '#000000', 1.00),
+    )),
     model_t( r'models\weapons\g_shotg' , 'tris.md2' , ('skin.pcx', ) , (
         mask_t('mask_barrel.png'    , '#9b1f00', 1.00),
         mask_t('mask_butt.png'      , '#000000', 1.00),
@@ -295,6 +312,25 @@ models = (
         mask_t('mask_leg2.png' , '#ff4400', 1.00),
     )),
 
+    model_t( r'players\male' , 'weapon.md2' , ('weapon.pcx', ) , (
+        mask_t('mask_wbarrel.png'   , '#9b1f00', 1.00),
+        mask_t('mask_whandler.png'  , '#9b1f00', 1.00),
+        mask_t('mask_wbut.png'      , '#000000', 1.00),
+        mask_t('mask_wmag.png'      , '#000000', 1.00),
+    )),
+    model_t( r'players\female' , 'weapon.md2' , ('weapon.pcx', ) , (
+        mask_t('mask_wbarrel.png'   , '#9b1f00', 1.00),
+        mask_t('mask_whandler.png'  , '#9b1f00', 1.00),
+        mask_t('mask_wbut.png'      , '#000000', 1.00),
+        mask_t('mask_wmag.png'      , '#000000', 1.00),
+    )),
+    model_t( r'players\cyborg' , 'weapon.md2' , ('weapon.pcx', ) , (
+        mask_t('mask_wbarrel.png'   , '#9b1f00', 1.00),
+        mask_t('mask_whandler.png'  , '#9b1f00', 1.00),
+        mask_t('mask_wbut.png'      , '#000000', 1.00),
+        mask_t('mask_wmag.png'      , '#000000', 1.00),
+    )),
+
     model_t( r'models\objects\smoke'        , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#aa0000', 1.00),)),
     model_t( r'models\objects\flash'        , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#000000', 1.00),)),
 
@@ -306,13 +342,14 @@ models = (
     model_t( r'models\objects\debris1'      , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
     model_t( r'models\objects\debris2'      , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
     model_t( r'models\objects\debris3'      , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
+
     model_t( r'models\objects\gibs\arm'     , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
     model_t( r'models\objects\gibs\bone2'   , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
     model_t( r'models\objects\gibs\bone'    , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
     model_t( r'models\objects\gibs\chest'   , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
     model_t( r'models\objects\gibs\gear'    , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
-    model_t( r'models\objects\gibs\head2'   , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
-    model_t( r'models\objects\gibs\head2'   , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
+    model_t( r'models\objects\gibs\head2'   , 'tris.md2' , ('skin.pcx',
+                                                            'player.pcx') , (mask_t( None , '#222222', 1.00),)),
     model_t( r'models\objects\gibs\head'    , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
     model_t( r'models\objects\gibs\leg'     , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
     model_t( r'models\objects\gibs\skull'   , 'tris.md2' , ('skin.pcx', ) , (mask_t( None , '#222222', 1.00),)),
@@ -426,7 +463,6 @@ for i in models:
             pak.add_file_from_disk1(f'in\\{skn}', skn)
 
     # Add mask skin in png format to pak
-    pak.add_file_from_disk(f'in\\mask\\{i.dir}\\mask.png')
     for m in i.masks:
         if m.file:
             pak.add_file_from_disk(f'in\\mask\\{i.dir}\\{m.file}')
