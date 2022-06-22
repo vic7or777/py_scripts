@@ -63,6 +63,7 @@ def pak_images(images_list, pak_name, apply_func, val=0):
     for im, path, im_type, col in images_list:
         # print(path)
         im1 = apply_func(im, val, col)
+        if not im1: continue
         with io.BytesIO() as f:
             im1.save(f, im_type)
             pak.add_file(path, f)
@@ -106,39 +107,20 @@ def change_intens(im, val, col):
             br = ImageEnhance.Brightness(im)
         return br.enhance(float(val))
 
-Intensities = (
-    '0.33',
-    '0.50',
-    '0.66',
-    '0.75',
-    '1.00',
-    '1.25',
-    '1.50',
-    '1.75',
-    '2.00',
-)
-Blends = (
-    '0.50',
-    '0.75',
-    '0.85',
-    '0.90',
-    '1.00',
-)
-
-#images_list = []
-#for wal in glob.iglob(f'{script_path}\\in\\textures\\**\\*.wal', recursive=True):
-#    path = wal.split('.')[0] + '.png'
-#    path = path.replace('\\in\\', '\\out\\')
-#    im = WalImageFile.open(wal)
-#    col = get_dominant_color(im)
-#    images_list.append((im, path, 'PNG', col))
-#
-#for i in Blends:
-#    pak_images(images_list, f'pak9_monocolor_blend_{i}_dim.pak', mono_color_blend, float(i))
-#
-#for i in Intensities:
-#    pak_images(images_list, f'pak9_intensity_{i}_dim.pak', change_intens, i)
-
+def dim_lamp(im, val, col):
+    im1 = im.resize((20,20), Image.LANCZOS)
+    im1 = im1.convert('L')
+    count = 0
+    for y in range(im1.height):
+        for x in range(im1.width):
+            pixel = im1.getpixel((x, y))
+            if pixel >= 35:
+                count += 1
+    if count>25:
+        if im.format == 'WAL': br = ImageEnhance.Brightness(im.convert('RGBA'))
+        else: br = ImageEnhance.Brightness(im)
+        return br.enhance(float(val))
+    return None
 
 # Load all textures from disk
 # Apply propper colormap to textures in WAL format
@@ -157,7 +139,7 @@ for tex in glob.iglob(f'{script_path}\\in\\textures\\**\\*.*', recursive=True):
     path = tex.replace('\\in\\', '\\out\\')
 
     if ext == 'wal':
-        path = path.split('.')[0] + '.png'
+        path = f'{path.split(".")[0]}.png'
         im = WalImageFile.open(tex)
         im.putpalette(colormap.palette)
         col = get_dominant_color(im)
@@ -179,14 +161,35 @@ for tex in glob.iglob(f'{script_path}\\in\\textures\\**\\*.*', recursive=True):
         col = get_dominant_color(im)
         images_list.append((im, path, 'JPEG', col))
 
-# Apply function "mono_color_blend" to all textures in "images_list" and save to PAK file
+Blends = (
+    '0.50',
+    '0.75',
+    '0.85',
+    '0.90',
+    '1.00',
+)
 
+Intensities = (
+    '0.33',
+    '0.50',
+    '0.66',
+    '0.75',
+    '1.00',
+    '1.25',
+    '1.50',
+    '1.75',
+    '2.00',
+)
+
+# Apply function "mono_color_blend" to all textures in "images_list" and save to PAK file
 for i in Blends:
     pak_images(images_list, f'pak9_monocolor_blend_{i}.pak', mono_color_blend, float(i))
 
 # Apply function "change_intens" to all textures in "images_list" and save to PAK file
-
 for i in Intensities:
     pak_images(images_list, f'pak9_intensity_{i}.pak', change_intens, i)
+
+# Apply function "dim_lamp" to all textures in "images_list" and save to PAK file
+pak_images(images_list, f'pak9_lamp_0.75.pak', dim_lamp, 0.75)
 
 print(f'Ready !')
