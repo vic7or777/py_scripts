@@ -202,11 +202,11 @@ def get_max_ln(D):
     return max_cv, max_vl
 
 
-zip_list = glob(f'*.zip')
+zip_list = glob(f'src/*.zip')
 
 for src_arch in (zip_list):
 
-    src_name = src_arch.rsplit('.', 1)[0].replace('-src','')
+    src_name = src_arch.rsplit('.', 1)[0].replace('-src','').rsplit('\\', 1)[1]
 
     cvars = {}
     for folder, cvar in Cvar_Get(src_arch):
