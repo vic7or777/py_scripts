@@ -227,7 +227,7 @@ def Cvars_Get(zip_arch):
                 txt = re_com3.sub(r''  , txt)
 
                 if re_q2pro_adr.search(txt):
-                    for i in range(15):
+                    for i in range(16):
                         yield folder, f'adr{i}, "", CVAR_ARCHIVE'
 
                 txt = re_unmacro1.sub(r'\1', txt)
