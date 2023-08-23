@@ -34,8 +34,22 @@ match sys.argv:
     case script_path, *_:
         pass
 
+script_name = op.basename(script_path)
 script_path = op.abspath(script_path)
 run_path = op.dirname(script_path)
+
+os.system('cls')
+print(sys.version)
+
+print(f'''
+This script make things:
+- Scan sources in src/*.zip
+- Generate a default config for each source archive
+
+Run options:
+    "{script_name}"         - list of cvars
+    "{script_name} 1"       - list of cvars with attributes
+''')
 
 print(' go')
 os.chdir(run_path)
@@ -89,12 +103,15 @@ vals = {
     's_sdldriver': 'directsound',   # yamagi-8.20
 }
 
-skip_vals = {
+skip_vars = {
 # quake2
     'game',
     'gamename',
     'gamedate',
     'qport',
+# r1q2
+    'sys_fpu_bits',
+    'cl_player_updates',
 # q2pro r179
     'in_device',
     'snddevice',
@@ -105,7 +122,31 @@ skip_vals = {
     's_device',
 # yamagi-8.20
     'cl_libcurl',
+# *_test*
+    'cl_test',
+    'cl_test2',
+    'cl_test3',
+    'cl_testblend',
+    'cl_testentities',
+    'cl_testlights',
+    'cl_testparticles',
+    'gl_r1gl_test',
+    'gl_test',
+    's_testsound',
 }
+
+order = (
+    'game', 'baseq2', 'savegame',
+    'server', 'net', 'mvd',
+    'client', 'input',
+    'vid', 'refresh',
+    'ref_gl', 'gl', 'sdl', 'gl1', 'gl3',
+    'ref_soft', 'soft', 'sw',
+    'sound', 'qal',
+    'win32', 'windows',
+    'qcommon', 'common',
+    'menu', 'ui',
+)
 
 # '... /* comment */ ...'
 re_com1 = re.compile( r'(?:\/\*)[\s\S]*?(?:\*\/)' ) 
@@ -136,23 +177,44 @@ re_unmacro2 = re.compile( r'(?:STRINGIFY|STRINGER)\((.*?)\)'         )
 re_unmacro3 = re.compile( r'\(\)'                       )
 
 # Cvar_Get(text) -> text
-re_cvar = re.compile( r'(?:cvar.get|gi.cvar|ri.cvar)\s*\(\s*("[\s\S]*?)\)+\s*[;,-]', flags=re.IGNORECASE)
+re_cvar = re.compile( r'(?:cvar.get|gi.cvar)\s*\(\s*("[\s\S]*?)\)+\s*[;,-]', flags=re.IGNORECASE)
 
 # Cvar_Get(va("adr%i",i) ...) -> adr0 .. adr15
 re_q2pro_adr = re.compile( r'Cvar_Get\(\s*va\(\s*"adr%i", i\s*\)' )
 
-def Cvar_Get(zip_arch):
+# find table of cheat cvars (quake2 / r1q2 / yamagi)
+# cheatvars[] = {text};
+re_cheat_table = re.compile(r'cheatvars\[\] = \{([\s\S]+?)\};', flags=re.IGNORECASE)
+# {"text", 0, 0, NULL},
+re_cheat_vars = re.compile(r'\{\s*"(.+?)"\s*,.*?\}', flags=re.IGNORECASE)
+
+def Cheat_Cvars_Get(zip_arch):
     with ZipFile(zip_arch) as zf:
         for file in zf.namelist():
 
-            if not file.endswith('.c'):
+            src_file = op.basename(file)
+            if not src_file.endswith('.c'):
                 continue
+            
+            with zf.open(file, 'r') as f:
+                txt = f.read().decode('cp1252')
+                tab = re_cheat_table.findall(txt)
+                for t in tab:
+                    for c in re_cheat_vars.findall(t):
+                        yield c
 
-            if op.basename(file) in ('cvar.c',):
+def Cvars_Get(zip_arch):
+    with ZipFile(zip_arch) as zf:
+        for file in zf.namelist():
+
+            src_file = op.basename(file)
+            if not src_file.endswith('.c'):
+                continue
+            if src_file in ('cvar.c',):
                 continue
 
             folder = op.basename(op.dirname(file))
-            if folder in ('irix','linux','solaris', 'unix', 'video'):
+            if folder in ('irix','linux','solaris', 'unix', 'video', 'ctf'):
                 continue
 
             with zf.open(file, 'r') as f:
@@ -208,12 +270,15 @@ for src_arch in (zip_list):
 
     src_name = src_arch.rsplit('.', 1)[0].replace('-src','').rsplit('\\', 1)[1]
 
-    cvars = {}
-    for folder, cvar in Cvar_Get(src_arch):
+    cheat_cvars = tuple(Cheat_Cvars_Get(src_arch))
+
+    cvars = {f:{} for f in order}
+
+    for folder, cvar in Cvars_Get(src_arch):
 
         v1, v2, v3 = str2cvar(cvar)
 
-        if v1 in skip_vals:
+        if v1 in skip_vars:
             continue
 
         if v1 in vals:
@@ -226,40 +291,60 @@ for src_arch in (zip_list):
             cvars[folder] = dict()
         cvars[folder][v1] = (v2,v3)
 
-        max_cv, max_vl = get_max_ln(cvars)
+    for F0 in cvars:
+        for c0 in cvars[F0]:
+            for F1 in reversed(cvars):
+                if F1 == F0:
+                    break
+                if c0 in cvars[F1]:
+                    del cvars[F1][c0]
 
-        for k in cvars:
-            cvars[k] = dict(sorted(cvars[k].items(), key=lambda x: x[0]))
+    max_cv, max_vl = get_max_ln(cvars)
 
+    with open(f'{src_name}.cfg', 'w') as f:
 
-    with open(f'{src_name}.txt', 'w') as f:
         for K, V in cvars.items():
+
+            if not V:
+                continue
+
             f.write(f'\n// {K}\n\n')
+
+            V = dict(sorted(V.items(), key=lambda x: x[0]))
+
             for k, v in V.items():
-                v1, v2, v3 = k, v[0], v[1]
+                cv, val, atr = k, v[0], v[1]
 
-                v1 = f'{v1:{max_cv}s}'
+                cv_ = f'{cv:{max_cv}s}'
+                val_ = f'{val:{max_vl}s}'
 
-                if v3 == '0':
-                    f.write(f'  set {v1} {v2}\n')
+                skip = cheat = False
+
+                if cv in cheat_cvars:
+                    cheat = True
+
+                if atr == '0':
+                    atrs = {'CHEAT'} if cheat else set()
                 else:
-                    v3 = list(map(str.strip, v3.split('|')))
-                    v3 = sorted(v3)
-                    skip = cheat = False
-                    for atr in v3:
-                        match atr:
-                            case 'NOSET' | 'ROM' | 'USER_CREATED':
-                                skip = True
-                            case 'CHEAT':
-                                cheat = True
-                    if skip:
-                        continue
+                    atrs = set(map(str.strip, atr.split('|')))
+                    if cheat:
+                        atrs.add('CHEAT')
 
-                    match option:
-                        case '1':
-                            v2 = f'{v2:{max_vl}s}'
-                            v3 = ' | '.join(v3)
-                            f.write(f'{"//" if cheat else "  "}set {v1} {v2} // {v3}\n')
-                        case _:
-                            f.write(f'{"//" if cheat else "  "}set {v1} {v2}\n')
+                for a in atrs:
+                    match a:
+                        case 'NOSET' | 'ROM' | 'USER_CREATED':
+                            skip = True
+                        case 'CHEAT':
+                            cheat = True
+
+                if skip:
+                    continue
+
+                match option:
+                    case '1': atr = ' | '.join(sorted(atrs))
+                    case _  : atr = 'CHEAT' if cheat else ''
+
+                if atr: f.write(f'// set {cv_} {val_} // {atr}\n')
+                else:   f.write(f'// set {cv_} {val}\n')
+
 print(' ok')
