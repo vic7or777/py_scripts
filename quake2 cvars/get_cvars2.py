@@ -91,7 +91,7 @@ consts = {
 }
 
 vals = {
-    'allow_download': '1',          # quake2
+    'allow_download': '0',          # quake2
     'm_fixaccel': '1',              # r1q2
     # 'gl_alphabits': '8',
     # 'gl_colorbits': '24',
@@ -112,6 +112,9 @@ skip_vars = {
 # r1q2
     'sys_fpu_bits',
     'cl_player_updates',
+    'dbg_framesleep',
+    # 'cl_stereo',
+    # 'cl_stereo_separation',
 # q2pro r179
     'in_device',
     'snddevice',
