@@ -135,8 +135,17 @@ skip_vars = {
     's_testsound',
 }
 
+skip_folders = (
+    # 'ctf',
+    'unix',
+    'linux',
+    'irix',
+    'solaris',
+    'video',
+)
+
 order = (
-    'game', 'baseq2', 'savegame',
+    'game', 'baseq2', 'savegame', 'ctf',
     'server', 'net', 'mvd',
     'client', 'input',
     'vid', 'refresh',
@@ -144,7 +153,9 @@ order = (
     'ref_soft', 'soft', 'sw',
     'sound', 'qal',
     'win32', 'windows',
+    'unix', 'linux', 'solaris', 'irix',
     'qcommon', 'common',
+    'video',
     'menu', 'ui',
 )
 
@@ -214,7 +225,7 @@ def Cvars_Get(zip_arch):
                 continue
 
             folder = op.basename(op.dirname(file))
-            if folder in ('irix','linux','solaris', 'unix', 'video', 'ctf'):
+            if folder in skip_folders:
                 continue
 
             with zf.open(file, 'r') as f:
@@ -308,7 +319,7 @@ for src_arch in (zip_list):
             if not V:
                 continue
 
-            f.write(f'\n// {K}\n\n')
+            first = True
 
             V = dict(sorted(V.items(), key=lambda x: x[0]))
 
@@ -339,6 +350,10 @@ for src_arch in (zip_list):
 
                 if skip:
                     continue
+
+                if first:
+                    f.write(f'\n// {K}\n\n')
+                    first = False
 
                 match option:
                     case '1': atr = ' | '.join(sorted(atrs))
