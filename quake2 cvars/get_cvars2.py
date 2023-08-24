@@ -116,8 +116,6 @@ skip_vars = {
     'sys_fpu_bits',
     'cl_player_updates',
     'dbg_framesleep',
-    # 'cl_stereo',
-    # 'cl_stereo_separation',
 # q2pro r179
     'in_device',
     'snddevice',
@@ -139,6 +137,12 @@ skip_vars = {
     'gl_r1gl_test',
     'gl_test',
     's_testsound',
+}
+
+skip_vars_prefix = {
+    'cl_stereo',
+    'joy_',
+    'dbg_',
 }
 
 skip_folders = (
@@ -310,6 +314,9 @@ for src_arch in (zip_list):
         v1, v2, v3 = str2cvar(cvar)
 
         if v1 in skip_vars:
+            continue
+
+        if any(map(v1.startswith, skip_vars_prefix)):
             continue
 
         if v1 in vals:
