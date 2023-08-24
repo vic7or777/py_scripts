@@ -48,7 +48,10 @@ This script make things:
 
 Run options:
     "{script_name}"         - list of cvars
-    "{script_name} 1"       - list of cvars with attributes
+    "{script_name} 1"       - list of cvars (with attributes)
+    "{script_name} 2"       - list of cvars (no commented and no set)
+    "{script_name} 3"       - flat list of cvars
+    "{script_name} 4"       - flat list of cvars (no commented and no set)
 ''')
 
 print(' go')
@@ -277,6 +280,20 @@ def get_max_ln(D):
     if max_vl > 25: max_vl = 25
     return max_cv, max_vl
 
+def remove_duplicates(cvars):
+    for F0 in cvars:
+        for c0 in cvars[F0]:
+            for F1 in reversed(cvars):
+                if F1 == F0:
+                    break
+                if c0 in cvars[F1]:
+                    del cvars[F1][c0]    
+
+def merge_parts(cvars):
+    D = {"":{}}
+    for v in reversed(cvars.values()):
+        D[""] |= v
+    return D
 
 zip_list = glob(f'src/*.zip')
 
@@ -305,13 +322,11 @@ for src_arch in (zip_list):
             cvars[folder] = dict()
         cvars[folder][v1] = (v2,v3)
 
-    for F0 in cvars:
-        for c0 in cvars[F0]:
-            for F1 in reversed(cvars):
-                if F1 == F0:
-                    break
-                if c0 in cvars[F1]:
-                    del cvars[F1][c0]
+    match option:
+        case '3'|'4':
+            cvars = merge_parts(cvars)
+        case _ :
+            remove_duplicates(cvars)
 
     max_cv, max_vl = get_max_ln(cvars)
 
@@ -354,7 +369,7 @@ for src_arch in (zip_list):
                 if skip:
                     continue
 
-                if first:
+                if first and K:
                     f.write(f'\n// {K}\n\n')
                     first = False
 
@@ -362,7 +377,12 @@ for src_arch in (zip_list):
                     case '1': atr = ' | '.join(sorted(atrs))
                     case _  : atr = 'CHEAT' if cheat else ''
 
-                if atr: f.write(f'// set {cv_} {val_} // {atr}\n')
-                else:   f.write(f'// set {cv_} {val}\n')
+                match option:
+                    case '2'|'4':
+                        if atr: f.write(f'  {cv_} {val_} // {atr}\n')
+                        else:   f.write(f'  {cv_} {val}\n')
+                    case _ :
+                        if atr: f.write(f'// set {cv_} {val_} // {atr}\n')
+                        else:   f.write(f'// set {cv_} {val}\n')
 
 print(' ok')
