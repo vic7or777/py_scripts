@@ -91,27 +91,14 @@ def remve_default_values_from_cfg(cvars, cfg, cfg_out):
         cfg_cvars = dict(sorted(cfg_cvars.items(), key=lambda x: x[0]))
 
         for v, k in cfg_binds.items():
-            sp = bind_maxln - len(k)
-            if sp % 2:
-                sr = sp // 2
-                sl = sp - sr
-            else:
-                sl = sp // 2
-                sr = sp - sl
-            sp *= ' '
-            sl *= ' '
-            sr *= ' '
             if not ';' in v:
                 v = ' ' + v.strip('"')
-            f.write(f'bind {k}{sp} {v}\n')
+            f.write(f'bind {k:{bind_maxln}s} {v}\n')
 
         for n, v in cfg_cvars.items():
-            sp = ' ' * (cvar_maxln - len(n))
             if not ' ' in v and v != '""':
                 v = ' ' + v.strip('"')
-            f.write(f'seta {n} {sp}{v}\n')
-
-        f.close()
+            f.write(f'seta {n:{cvar_maxln}s} {v}\n')
 
 remve_default_values_from_cfg(cvars, 'q3config.cfg', 'q3config.cfg')
 
