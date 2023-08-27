@@ -36,10 +36,9 @@ for file in files:
         continue
 
     with open(file) as f:
-        s = f.read().splitlines()
-        s = LINEBREAK.join(s)
+        s = f.read()
 
     with open(file, 'w') as f:
-        f.write(s + LINEBREAK)
+        f.write(LINEBREAK.join(s.splitlines()) + LINEBREAK)
 
 print(' ok')
