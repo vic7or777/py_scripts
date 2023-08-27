@@ -1,5 +1,6 @@
 from collections import namedtuple
 import sys, os
+import re
 
 PATH_HOME = os.path.abspath(os.path.dirname(sys.argv[0]))
 os.chdir(PATH_HOME)
@@ -7,82 +8,90 @@ os.system('cls')
 
 cvars_console_dump = 'defaults.q3'
 
-cvar = namedtuple('cvar', 'S,U,R,I,A,L,C,T, name, value')
+skip_vars_pfx = {
+    'ui_',
+}
+skip_flags = {'R', 'I', 'C', }
 
+def split(s, n, c = ' '):
+    return tuple(map(str.strip, s.strip().split(c, n)))
+
+cvar = namedtuple('cvar', 'value, flags')
+nocvar = cvar('', set())
+cvars = {}
 with open(f'{PATH_HOME}\\{cvars_console_dump}') as f:
-   con_dump = f.readlines()
+    con_dump = f.readlines()
+    for ln in con_dump:
+        flags = set(ln[:7].split())
+        name, value = split(ln[8:], 1)
+        if value.strip('"').startswith('0x'):
+            value  = value.lower()
+        name = name.lower()
+        cvars[name] = cvar(value, flags)
 
-cvars = []
-for ln in con_dump:
-    flags = ln[0:7]
-    name_value = ln[8:].strip(' \n').split(' ', 1)
-    name = name_value[0].strip()
-    value = name_value[1].strip()
-    if value.strip('"').startswith('0x'):
-        value  = value.lower()
-
-    c = cvar(
-        S = 'S' in flags,
-        U = 'U' in flags,
-        R = 'R' in flags,
-        I = 'I' in flags,
-        A = 'A' in flags,
-        L = 'L' in flags,
-        C = 'C' in flags,
-        T = 'T' in flags,
-        name  = name,
-        value = value
-    )
-    cvars.append(c)
+wsp = re.compile(r'\s+')
 
 def remve_default_values_from_cfg(cvars, cfg, cfg_out):
     with open(f'{PATH_HOME}\\{cfg}') as f:
         cfg_lines = f.readlines()
-    
-    cfg_cvars = []
-    cvar_max_len = 0
-    cfg_binds = []
-    bind_max_len = 0
-    with open(f'{PATH_HOME}\\{cfg_out}', 'w') as f:   
+
+    cfg_cvars = {}
+    cvar_maxln = 0
+    cfg_binds = {}
+    bind_maxln = 0
+
+    with open(f'{PATH_HOME}\\{cfg_out}', 'w') as f:
         for ln in cfg_lines:
-            ln = ln.strip(' \n')
-            if ln.startswith('seta '):
-                name_value = ln[5:].strip().split(' ', 1)
-                name = name_value[0].strip()
-                value = name_value[1].strip()
-                if value.strip('"').startswith('0x'):
-                    value  = value.lower()
-                skip = False
-                deflt = False
-                found = False
-                for v in cvars:
-                    if v.name == name:
-                        found = True
-                        if v.R or v.I or v.C or name.startswith('ui_'):
-                            skip = True
-                            break
-                        if v.value == value:
-                            deflt = True
-                            break
-                if skip or deflt:
+
+            # ln = wsp.sub(' ', ln.strip())
+            ln = ln.strip()
+
+            match tuple(map(str.strip, ln.split(' ', 1))):
+
+                case 'set'|'seta', val:
+                    name, value = split(val, 1)
+                    name_ = name.lower()
+
+                    if value.strip('"').startswith('0x'):
+                        value  = value.lower()
+
+                    if any(map(name_.startswith, skip_vars_pfx)):
+                        continue
+
+                    if name_ in cvars:
+                        default = cvars[name_]
+
+                        if default.flags & skip_flags:
+                            continue
+
+                        if default.value == value:
+                            continue
+
+                        cfg_cvars[name] = value
+                        if cvar_maxln < len(name):
+                            cvar_maxln = len(name)
+
+                        continue
+
+                case 'bind', val:
+                    key, value = split(val, 1)
+
+                    cfg_binds[value] = key
+                    if bind_maxln < len(key):
+                        bind_maxln = len(key)
+
                     continue
-                elif found:
-                    cfg_cvars.append((name, value))
-                    if cvar_max_len < len(name):
-                        cvar_max_len = len(name)
-                    continue
-            if ln.startswith('bind '):
-                name_value = ln[5:].strip().split(' ', 1)
-                name = name_value[0].strip()
-                value = name_value[1].strip()
-                cfg_binds.append((name, value))
-                if bind_max_len < len(name):
-                    bind_max_len = len(name)
-                continue
+
+                case _ :
+                    pass
+
             f.write(ln + '\n')
 
-        for n, v in sorted(cfg_binds, key=lambda x: x[1]):
-            sp = bind_max_len - len(n)
+        cfg_binds = dict(sorted(cfg_binds.items(), key=lambda x: x[0].strip('"')))
+        cfg_cvars = dict(sorted(cfg_cvars.items(), key=lambda x: x[0]))
+
+        for v, k in cfg_binds.items():
+            sp = bind_maxln - len(k)
             if sp % 2:
                 sr = sp // 2
                 sl = sp - sr
@@ -93,16 +102,17 @@ def remve_default_values_from_cfg(cvars, cfg, cfg_out):
             sl *= ' '
             sr *= ' '
             if not ';' in v:
-                v = v.strip('"')
-            f.write(f'bind {n}{sp} {v}\n')
+                v = ' ' + v.strip('"')
+            f.write(f'bind {k}{sp} {v}\n')
 
-        for n, v in sorted(cfg_cvars, key=lambda x: x[0]):
-            sp = ' ' * (cvar_max_len - len(n))
+        for n, v in cfg_cvars.items():
+            sp = ' ' * (cvar_maxln - len(n))
             if not ' ' in v and v != '""':
-                v = v.strip('"')
+                v = ' ' + v.strip('"')
             f.write(f'seta {n} {sp}{v}\n')
 
-        
         f.close()
 
 remve_default_values_from_cfg(cvars, 'q3config.cfg', 'q3config.cfg')
+
+print('ok')
