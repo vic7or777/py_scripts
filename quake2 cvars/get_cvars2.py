@@ -202,6 +202,7 @@ re_cvar = re.compile( r'(?:cvar.get|gi.cvar)\s*\(\s*("[\s\S]*?)\)+\s*[;,-]', fla
 
 # Cvar_Get(va("adr%i",i) ...) -> adr0 .. adr15
 re_q2pro_adr = re.compile( r'Cvar_Get\(\s*va\(\s*"adr%i", i\s*\)' )
+re_yq2_adr = re.compile( r'Cvar_Get\(buffer, "", CVAR_ARCHIVE\);' )
 
 # find table of cheat cvars (quake2 / r1q2 / yamagi)
 # cheatvars[] = {text};
@@ -247,8 +248,11 @@ def Cvars_Get(zip_arch):
                 txt = re_com2.sub(r'\n', txt)
                 txt = re_com3.sub(r''  , txt)
 
-                if re_q2pro_adr.search(txt):
-                    for i in range(16):
+                adrs = 0
+                if re_q2pro_adr.search(txt): adrs = 16
+                elif re_yq2_adr.search(txt): adrs = 9
+                if adrs:
+                    for i in range(adrs):
                         yield folder, f'adr{i}, "", CVAR_ARCHIVE'
 
                 txt = re_unmacro1.sub(r'\1', txt)
