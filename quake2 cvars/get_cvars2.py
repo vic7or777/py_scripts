@@ -255,9 +255,9 @@ def Cvars_Get(zip_arch):
                     for i in range(adrs):
                         yield folder, f'adr{i}, "", CVAR_ARCHIVE'
 
+                txt = re_unmacro3.sub(r''  , txt)
                 txt = re_unmacro1.sub(r'\1', txt)
                 txt = re_unmacro2.sub(r'\1', txt)
-                txt = re_unmacro3.sub(r''  , txt)
 
                 cvars = re_cvar.findall(txt)
                 for cvar in cvars:
