@@ -309,6 +309,11 @@ for src_arch in (zip_list):
 
     src_name = src_arch.rsplit('.', 1)[0].replace('-src','').rsplit('\\', 1)[1]
 
+    cfg_path = f'{src_name}.cfg'
+
+    if op.exists(cfg_path):
+        continue
+
     cheat_cvars = tuple(Cheat_Cvars_Get(src_arch))
 
     cvars = {f:{} for f in order}
@@ -340,8 +345,8 @@ for src_arch in (zip_list):
             remove_duplicates(cvars)
 
     max_cv, max_vl = get_max_ln(cvars)
-
-    with open(f'{src_name}.cfg', 'w') as f:
+    
+    with open(cfg_path, 'w') as f:
 
         for K, V in cvars.items():
 
