@@ -7,20 +7,16 @@ req_libs = {
 def install_req_libs(req_libs):
     import subprocess, sys, os
     upgr = True
-    run_pip = '-Xfrozen_modules=off -m pip'
-    fix_ssl = 'config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org" \
---trusted-host=pypi.python.org --trusted-host=pypi.org --trusted-host=files.pythonhosted.org'
-
+    pipcmd = '-m pip install --trusted-host=pypi.org --trusted-host=pypi.python.org --trusted-host=files.pythonhosted.org'
     for imp, inst in req_libs.items():
         try:
             __import__(imp)
         except (ModuleNotFoundError, ImportError):
             try:
                 if upgr:
-                    subprocess.check_call([sys.executable, f'{run_pip} {fix_ssl}'])
-                    subprocess.check_call([sys.executable, f'{run_pip} install --upgrade pip'])
+                    subprocess.check_call([sys.executable,  f'{pipcmd} --upgrade pip'])
                     upgr = False
-                subprocess.check_call([sys.executable, f'{run_pip} install {inst}'])
+                subprocess.check_call([sys.executable, f'{pipcmd} {inst}'])
             except:
                 print(f'Need to install librarys: {req_libs.keys()}')
                 os.system('pause')
