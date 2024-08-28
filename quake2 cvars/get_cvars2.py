@@ -1,23 +1,32 @@
 if __name__ != '__main__': exit()
 # ----------------------------------------------------------------------------
-required_libs = {
-    'regex',
+req_libs = {
+    'regex': 'regex',
 }
 # ----------------------------------------------------------------------------
-def install_lib(required):
-    import sys, os
-    from subprocess import check_call
-    from pkg_resources import working_set
-    installed = {pkg.key for pkg in working_set}
-    missing = required - installed
-    if missing:
+def install_req_libs(req_libs):
+    import subprocess, sys, os
+    upgr = True
+    run_pip = '-Xfrozen_modules=off -m pip'
+    fix_ssl = 'config set global.trusted-host "pypi.org files.pythonhosted.org pypi.python.org" \
+--trusted-host=pypi.python.org --trusted-host=pypi.org --trusted-host=files.pythonhosted.org'
+
+    for imp, inst in req_libs.items():
         try:
-            check_call([sys.executable, '-m', 'pip', 'install', *missing])
-        except:
-            print(f'Need to install library: {list(missing)}')
-            os.system('pause')
-            exit()
-install_lib(required_libs)
+            __import__(imp)
+        except (ModuleNotFoundError, ImportError):
+            try:
+                if upgr:
+                    subprocess.check_call([sys.executable, f'{run_pip} {fix_ssl}'])
+                    subprocess.check_call([sys.executable, f'{run_pip} install --upgrade pip'])
+                    upgr = False
+                subprocess.check_call([sys.executable, f'{run_pip} install {inst}'])
+            except:
+                print(f'Need to install librarys: {req_libs.keys()}')
+                os.system('pause')
+                exit()
+
+install_req_libs(req_libs)
 # ----------------------------------------------------------------------------
 
 import sys, os, os.path as op
@@ -88,6 +97,11 @@ consts = {
     'NET_EnableIP6': '1',
 # q2pro r2765
     'MAX_PACKET_ENTITIES': '128',
+# q2pro r3290
+    'HISTORY_SIZE': '128',
+    'R_TEXTURE_FORMATS': 'png jpg tga',
+# q2pro r3470
+    'DEFGLPROFILE': '""',
 # yamagi-8.20
     'DEFAULT_OPENGL_DRIVER': 'opengl32',
     'DEFAULT_OPENAL_DRIVER': 'openal32.dll',
@@ -103,6 +117,7 @@ vals = {
     'com_time_format': '%H.%M',     # q2pro
     'net_enable_ipv6': '1',         # q2pro r1504
     'gl_shaders': '1',              # q2pro r2765
+    'sv_allow_map': '0',            # q2pro r3470
     's_sdldriver': 'directsound',   # yamagi-8.20
 }
 
