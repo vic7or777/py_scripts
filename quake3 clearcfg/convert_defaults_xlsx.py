@@ -1,73 +1,89 @@
 # ----------------------------------------------------------------------------
 required_libs = {
-    'xlsxwriter',
+    # import: install,
+    'xlsxwriter': 'xlsxwriter',
 }
 # ----------------------------------------------------------------------------
-def install_lib(required):
-    import sys, os
-    from subprocess import check_call
-    from pkg_resources import working_set
-    installed = {pkg.key for pkg in working_set}
-    missing = required - installed
-    if missing:
+def install_req_libs(req_libs):
+    import subprocess, sys, os
+    upgr = True
+    pipcmd = '-m pip install --trusted-host=pypi.org --trusted-host=pypi.python.org --trusted-host=files.pythonhosted.org'
+    for imp, inst in req_libs.items():
         try:
-            check_call([sys.executable, '-m', 'pip', 'install', *missing])
-        except:
-            print(f'Need to install library: {list(missing)}')
-            os.system('pause')
-            exit()
-install_lib(required_libs)
+            __import__(imp)
+        except (ModuleNotFoundError, ImportError):
+            try:
+                if upgr:
+                    subprocess.check_call([sys.executable,  f'{pipcmd} --upgrade pip'])
+                    upgr = False
+                subprocess.check_call([sys.executable, f'{pipcmd} {inst}'])
+            except:
+                print(f'Need to install librarys: {req_libs.keys()}')
+                os.system('pause')
+                exit()
+
+install_req_libs(required_libs)
 # ----------------------------------------------------------------------------
 
-from collections import namedtuple
 import sys, os
 import xlsxwriter
+from xlsxwriter.utility import xl_col_to_name
 
 PATH_HOME = os.path.abspath(os.path.dirname(sys.argv[0]))
 os.chdir(PATH_HOME)
 
-with open(f'{PATH_HOME}\\defaults.ql') as f:
-   con_dump = f.readlines()
+for fname in ('defaults_q3', 'defaults_ql'):
 
-with xlsxwriter.Workbook('ql_defaults.xlsx') as wb:
-    sh = wb.add_worksheet('Sheet1')
-    sh.freeze_panes(1, 0)
+    with open(f'{fname}.txt') as f:
+        con_dump = f.readlines()
 
-    hdr = {
-        'S'     : ( 5, None, None, None),
-        'U'     : ( 5, None, None, None),
-        'R'     : ( 5, None, None, None),
-        'I'     : ( 5, None, None, None),
-        'A'     : ( 5, None, None, None),
-        'L'     : ( 5, None, None, None),
-        'C'     : ( 5, None, None, None),
-        'T'     : ( 5, None, None, None),
-        'pfx'   : (10, None, None, None),
-        'var'   : (25, None, None, None),
-        'val'   : (50, None, None, None),
-    }
-    leters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    with xlsxwriter.Workbook(f'{fname}.xlsx') as wb:
+        sh = wb.add_worksheet('Sheet1')
+        sh.freeze_panes(1, 0)
 
-    row = 0
-    for col, key in enumerate(hdr, 0):
-        c = leters[col]
-        cfg = hdr[key]
-        sh.set_column(f'{c}:{c}', cfg[0], cfg[2], cfg[3])
-        sh.write(row, col, key, cfg[1])
-            
-    for ln in con_dump:
-        row += 1
+        hdr = {
+            'S'     : ( 5, None, None, None, ''           ),
+            'U'     : ( 5, None, None, None, ''           ),
+            'R'     : ( 5, None, None, None, 'x == Blanks'),
+            'I'     : ( 5, None, None, None, 'x == Blanks'),
+            'A'     : ( 5, None, None, None, ''           ),
+            'L'     : ( 5, None, None, None, ''           ),
+            'C'     : ( 5, None, None, None, 'x == Blanks'),
+            'T'     : ( 5, None, None, None, ''           ),
+            'pfx'   : (10, None, None, None, ''           ),
+            'var'   : (25, None, None, None, ''           ),
+            'val'   : (50, None, None, None, ''           ),
+        }
+        leters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
-        flags = list(ln[0:8])
+        c = xl_col_to_name(len(hdr)-1)
+        w = len(con_dump)+1
+        sh.autofilter(f'A1:{c}{w}')
 
-        name, value = ln[9:].strip().split(' ', 1)
+        row = 0
+        for col, txt in enumerate(hdr):
+            c = xl_col_to_name(col)
+            colwidth, celfmt, colfmt, colopt, filt = hdr[txt]
+            sh.set_column(f'{c}:{c}', colwidth, colfmt, colopt)
+            sh.write(row, col, txt, celfmt)
+            if filt:
+                sh.filter_column(c, filt)
+                
+        for ln in con_dump:
+            row += 1
 
-        pfx = f"{name.split('_', 1)[0]}_" if '_' in name else ''
+            flags = list(ln[0:8])
 
-        if not ' ' in value and value != '""':
-            value = ' ' + value.strip('"')
+            name, value = ln[9:].strip().split(' ', 1)
 
-        cvar = flags + [pfx,] + [name, value]
+            pfx = f"{name.split('_', 1)[0]}_" if '_' in name else ''
 
-        for col, val in enumerate(cvar):
-            sh.write(row, col, val, None)
+            if not ' ' in value and value != '""':
+                value = value.strip('"')
+
+            value = f' {value}'
+
+            cvar = flags + [pfx, name, value]
+
+            for col, val in enumerate(cvar):
+                sh.write(row, col, val, None)

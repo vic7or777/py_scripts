@@ -1,37 +1,61 @@
-from collections import namedtuple
 import sys, os
 import re
+from decimal import Decimal as D
+from collections import namedtuple
 
 PATH_HOME = os.path.abspath(os.path.dirname(sys.argv[0]))
 os.chdir(PATH_HOME)
 os.system('cls')
 
-cvars_console_dump = 'defaults.ql'
-
 skip_vars_pfx = {
     'ui_',
+    'r_lastvalidrenderer'
 }
 skip_flags = {'R', 'I', 'C', }
+
+isnum = re.compile(r'-?[\d\.]+f?')
+
+def remove_exp(d):
+    return d.quantize(D(1)) if d == d.to_integral() else d.normalize()
+
+def str_to_dec(s):
+    ss = s.strip('"').strip().lower()
+    dot = ss.count('.')
+    if (0 <= dot <= 1) and isnum.fullmatch(ss):
+        ss = ss.rstrip('f')
+        if D(ss) == D('0'):
+            ss = '0'
+        elif dot == 1:
+            ss = ss.lstrip('0').rstrip('0').rstrip('.')
+        else:
+            ss = ss.lstrip('0')
+        return remove_exp(D(ss))
+    return s
 
 def split(s, n, c = ' '):
     return tuple(map(str.strip, s.strip().split(c, n)))
 
 cvar = namedtuple('cvar', 'value, flags')
-nocvar = cvar('', set())
-cvars = {}
-with open(f'{PATH_HOME}\\{cvars_console_dump}') as f:
-    con_dump = f.readlines()
-    for ln in con_dump:
-        flags = set(ln[:7].split())
-        name, value = split(ln[8:], 1)
-        if value.strip('"').startswith('0x'):
-            value  = value.lower()
-        name = name.lower()
-        cvars[name] = cvar(value, flags)
+
+def get_defaults(cvars_console_dump):
+    cvars = {}
+    with open(f'{PATH_HOME}\\{cvars_console_dump}') as f:
+        con_dump = f.readlines()
+        for ln in con_dump:
+            flags = set(ln[:7].split())
+            name, value = split(ln[8:], 1)
+            if value.strip('"').startswith('0x'):
+                value  = value.lower()
+            value = str_to_dec(value)
+            name = name.lower()
+            cvars[name] = cvar(value, flags)
+    return cvars
 
 wsp = re.compile(r'\s+')
 
-def remve_default_values_from_cfg(cvars, cfg, cfg_out):
+def remove_default_values_from_cfg(def_fname, cfg, cfg_out):
+
+    cvars = get_defaults(def_fname)
     with open(f'{PATH_HOME}\\{cfg}') as f:
         cfg_lines = f.readlines()
 
@@ -54,6 +78,8 @@ def remve_default_values_from_cfg(cvars, cfg, cfg_out):
 
                     if value.strip('"').startswith('0x'):
                         value  = value.lower()
+
+                    value = str_to_dec(value)
 
                     if any(map(name_.startswith, skip_vars_pfx)):
                         continue
@@ -96,11 +122,15 @@ def remve_default_values_from_cfg(cvars, cfg, cfg_out):
             f.write(f'bind {k:{bind_maxln}s} {v}\n')
 
         for n, v in cfg_cvars.items():
+            v = str(v)
             if not ' ' in v and v != '""':
                 v = ' ' + v.strip('"')
             f.write(f'seta {n:{cvar_maxln}s} {v}\n')
 
-remve_default_values_from_cfg(cvars, 'qzconfig.cfg', 'qzconfig.cfg')
-remve_default_values_from_cfg(cvars, 'repconfig.cfg', 'repconfig.cfg')
+
+remove_default_values_from_cfg('defaults_q3.txt', 'q3config.cfg', 'q3config.cfg')
+
+remove_default_values_from_cfg('defaults_ql.txt', 'qzconfig.cfg', 'qzconfig.cfg')
+remove_default_values_from_cfg('defaults_ql.txt', 'repconfig.cfg', 'repconfig.cfg')
 
 print('ok')
