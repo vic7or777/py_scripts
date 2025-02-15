@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, os.path as op
 import re
 from decimal import Decimal as D
 from collections import namedtuple
@@ -37,26 +37,40 @@ def split(s, n, c = ' '):
 
 cvar = namedtuple('cvar', 'value, flags')
 
-def get_defaults(cvars_console_dump):
+def get_defaults(fname):
     cvars = {}
-    with open(f'{PATH_HOME}\\{cvars_console_dump}') as f:
+    with open(fname) as f:
         con_dump = f.readlines()
         for ln in con_dump:
             flags = set(ln[:7].split())
+
             name, value = split(ln[8:], 1)
+
             if value.strip('"').startswith('0x'):
                 value  = value.lower()
             value = str_to_dec(value)
+
             name = name.lower()
+
             cvars[name] = cvar(value, flags)
+
     return cvars
 
 wsp = re.compile(r'\s+')
 
-def remove_default_values_from_cfg(def_fname, cfg, cfg_out):
+def remove_default_values_from_cfg(cvars_condump, cfg_in, cfg_out):
 
-    cvars = get_defaults(def_fname)
-    with open(f'{PATH_HOME}\\{cfg}') as f:
+    fname = f'{PATH_HOME}\\{cvars_condump}'
+    if not op.exists(fname):
+        return
+
+    cvars = get_defaults(fname)
+
+    fname = f'{PATH_HOME}\\{cfg_in}'
+    if not op.exists(fname):
+        return
+
+    with open(fname) as f:
         cfg_lines = f.readlines()
 
     cfg_cvars = {}
@@ -128,9 +142,9 @@ def remove_default_values_from_cfg(def_fname, cfg, cfg_out):
             f.write(f'seta {n:{cvar_maxln}s} {v}\n')
 
 
-remove_default_values_from_cfg('defaults_q3.txt', 'q3config.cfg', 'q3config.cfg')
+remove_default_values_from_cfg('defaults_q3.txt', 'q3config.cfg', 'q3config_.cfg')
 
-remove_default_values_from_cfg('defaults_ql.txt', 'qzconfig.cfg', 'qzconfig.cfg')
-remove_default_values_from_cfg('defaults_ql.txt', 'repconfig.cfg', 'repconfig.cfg')
+remove_default_values_from_cfg('defaults_ql.txt', 'qzconfig.cfg', 'qzconfig_.cfg')
+remove_default_values_from_cfg('defaults_ql.txt', 'repconfig.cfg', 'repconfig_.cfg')
 
 print('ok')
