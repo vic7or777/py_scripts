@@ -9,9 +9,13 @@ os.system('cls')
 
 skip_vars_pfx = {
     'ui_',
-    'r_lastvalidrenderer'
+    'cg_selectedPlayerName',
+    # 'r_lastvalidrenderer',
 }
+
 skip_flags = {'R', 'I', 'C', }
+
+skip_vars_pfx = set(map(str.lower, skip_vars_pfx))
 
 isnum = re.compile(r'-?[\d\.]+f?')
 
@@ -35,7 +39,7 @@ def str_to_dec(s):
 def split(s, n, c = ' '):
     return tuple(map(str.strip, s.strip().split(c, n)))
 
-cvar = namedtuple('cvar', 'value, flags')
+cvar = namedtuple('cvar', 'name, value, flags')
 
 def get_defaults(fname):
     cvars = {}
@@ -50,9 +54,7 @@ def get_defaults(fname):
                 value  = value.lower()
             value = str_to_dec(value)
 
-            name = name.lower()
-
-            cvars[name] = cvar(value, flags)
+            cvars[name.lower()] = cvar(name, value, flags)
 
     return cvars
 
@@ -82,30 +84,32 @@ def remove_default_values_from_cfg(cvars_condump, cfg_in, cfg_out):
         for ln in cfg_lines:
 
             # ln = wsp.sub(' ', ln.strip())
-            ln = ln.strip()
+            ln = ln.strip(' \n')
 
             match tuple(map(str.strip, ln.split(' ', 1))):
 
                 case 'set'|'seta', val:
                     name, value = split(val, 1)
-                    name_ = name.lower()
+
+                    name = name.lower()
 
                     if value.strip('"').startswith('0x'):
                         value  = value.lower()
-
                     value = str_to_dec(value)
 
-                    if any(map(name_.startswith, skip_vars_pfx)):
+                    if any(map(name.startswith, skip_vars_pfx)):
                         continue
 
-                    if name_ in cvars:
-                        default = cvars[name_]
+                    if name in cvars:
+                        default = cvars[name]
 
                         if default.flags & skip_flags:
                             continue
 
                         if default.value == value:
                             continue
+
+                        name = default.name
 
                         cfg_cvars[name] = value
                         if cvar_maxln < len(name):
@@ -130,10 +134,14 @@ def remove_default_values_from_cfg(cvars_condump, cfg_in, cfg_out):
         cfg_binds = dict(sorted(cfg_binds.items(), key=lambda x: x[0].strip('"')))
         cfg_cvars = dict(sorted(cfg_cvars.items(), key=lambda x: x[0]))
 
+        if cfg_binds: f.write("\n")
+
         for v, k in cfg_binds.items():
             if not ';' in v:
                 v = ' ' + v.strip('"')
             f.write(f'bind {k:{bind_maxln}s} {v}\n')
+
+        if cfg_cvars: f.write("\n")
 
         for n, v in cfg_cvars.items():
             v = str(v)
@@ -142,9 +150,9 @@ def remove_default_values_from_cfg(cvars_condump, cfg_in, cfg_out):
             f.write(f'seta {n:{cvar_maxln}s} {v}\n')
 
 
-remove_default_values_from_cfg('defaults_q3.txt', 'q3config.cfg', 'q3config_.cfg')
+remove_default_values_from_cfg('defaults_q3.txt', 'q3config.cfg', 'q3config.cfg')
 
-remove_default_values_from_cfg('defaults_ql.txt', 'qzconfig.cfg', 'qzconfig_.cfg')
-remove_default_values_from_cfg('defaults_ql.txt', 'repconfig.cfg', 'repconfig_.cfg')
+remove_default_values_from_cfg('defaults_ql.txt', 'qzconfig.cfg', 'qzconfig.cfg')
+remove_default_values_from_cfg('defaults_ql.txt', 'repconfig.cfg', 'repconfig.cfg')
 
 print('ok')
