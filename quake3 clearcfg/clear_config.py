@@ -84,7 +84,10 @@ def remove_default_values_from_cfg(cvars_condump, cfg_in, cfg_out):
         for ln in cfg_lines:
 
             # ln = wsp.sub(' ', ln.strip())
-            ln = ln.strip(' \n')
+            ln = ln.strip()
+
+            if ln == '':
+                continue
 
             match tuple(map(str.strip, ln.split(' ', 1))):
 
