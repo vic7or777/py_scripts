@@ -8,9 +8,17 @@ os.chdir(PATH_HOME)
 os.system('cls')
 
 skip_vars_pfx = {
-    'ui_',
-    'cg_selectedPlayerName',
-    # 'r_lastvalidrenderer',
+    'ui_',          # q3
+    'vid_',
+    'win_',
+    'botsession',   # osp
+    'ca_session',
+    'mapsession',
+    'session',
+    'cgsession',    # cpma
+    'itsession',
+    'ndpsession',
+    'cg_selectedPlayerName',    # ql
 }
 
 skip_flags = {'R', 'I', 'C', }
@@ -42,13 +50,15 @@ def split(s, n, c = ' '):
 cvar = namedtuple('cvar', 'name, value, flags')
 
 def get_defaults(fname):
+    w = 8 if 'cnq3' in fname else 7
+
     cvars = {}
     with open(fname) as f:
         con_dump = f.readlines()
         for ln in con_dump:
-            flags = set(ln[:7].split())
+            flags = set(ln[:w].split())
 
-            name, value = split(ln[8:], 1)
+            name, value = split(ln[w+1:], 1)
 
             if value.strip('"').startswith('0x'):
                 value  = value.lower()
@@ -157,5 +167,7 @@ remove_default_values_from_cfg('defaults_q3.txt', 'q3config.cfg', 'q3config.cfg'
 
 remove_default_values_from_cfg('defaults_ql.txt', 'qzconfig.cfg', 'qzconfig.cfg')
 remove_default_values_from_cfg('defaults_ql.txt', 'repconfig.cfg', 'repconfig.cfg')
+
+remove_default_values_from_cfg('defaults_cnq3cpma.txt', 'q3config_cnq3cpma.cfg', 'q3config_cnq3cpma.cfg')
 
 print('ok')
