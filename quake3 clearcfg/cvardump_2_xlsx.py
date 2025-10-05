@@ -56,6 +56,9 @@ for fname in ('defaults_q3', 'defaults_ql'):
         }
         leters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 
+        if fname == 'defaults_q3':
+            hdr.pop('T')
+
         c = xl_col_to_name(len(hdr)-1)
         w = len(con_dump)+1
         sh.autofilter(f'A1:{c}{w}')
@@ -68,13 +71,14 @@ for fname in ('defaults_q3', 'defaults_ql'):
             sh.write(row, col, txt, celfmt)
             if filt:
                 sh.filter_column(c, filt)
-                
+
+        i = len(hdr)-3
+
         for ln in con_dump:
             row += 1
 
-            flags = list(ln[0:8])
-
-            name, value = ln[9:].strip().split(' ', 1)
+            flags = list(ln[0:i])
+            name, value = ln[i+1:].strip().split(' ', 1)
 
             pfx = f"{name.split('_', 1)[0]}_" if '_' in name else ''
 
